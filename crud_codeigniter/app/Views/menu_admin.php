@@ -28,7 +28,7 @@
                 <section id="header-right-content" class="collapse navbar-collapse">
                     <ul id="header-right-content-list" class="navbar-nav">
                         <li class="nav-item">
-                            <a href="<?php echo base_url(); ?>adicionar_livro" class="d-flex align-items-center">
+                            <a href="<?php echo base_url(); ?>adicionar" class="d-flex align-items-center">
                                 <span class="material-symbols-outlined header-icon">add</span>
                                 <p class="m-0">Adicionar livro</p>
                             </a>

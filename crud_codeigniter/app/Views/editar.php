@@ -28,7 +28,7 @@
                 <section id="header-right-content" class="collapse navbar-collapse">
                     <ul id="header-right-content-list" class="navbar-nav">
                         <li class="nav-item">
-                            <a href="<?php echo base_url(); ?>adicionar_livro" class="d-flex align-items-center">
+                            <a href="<?php echo base_url(); ?>adicionar" class="d-flex align-items-center">
                                 <span class="material-symbols-outlined header-icon">add</span>
                                 <p class="m-0">Adicionar livro</p>
                             </a>
@@ -70,15 +70,15 @@
             </div>
             <div class="mb-3">
                 <label for="input-atualizar-autor" class="form-label">Nome do(a) autor(a)</label>
-                <input id="input-atualizar-autor" name="autor" class="form-control" type="text" pattern="^(?=.*[a-zA-Z]).{1,128}$" maxlength="128" value="<?php echo $autor; ?>">
+                <input id="input-atualizar-autor" name="autor" class="form-control" type="text" pattern="^(?=.*[a-zA-Z]).{1,128}$" maxlength="128" value="<?php echo $autor; ?>" required>
             </div>
             <div class="mb-3">
                 <label for="input-atualizar-editora" class="form-label">Nome da editora</label>
-                <input id="input-atualizar-editora" name="editora" class="form-control" type="text" pattern="^(?=.*[a-zA-Z]).{1,128}$" maxlength="128" value="<?php echo $editora; ?>">
+                <input id="input-atualizar-editora" name="editora" class="form-control" type="text" pattern="^(?=.*[a-zA-Z]).{1,128}$" maxlength="128" value="<?php echo $editora; ?>" required>
             </div>
             <div class="mb-4">
                 <label for="input-atualizar-ano" class="form-label">Ano de publicação</label>
-                <input id="input-atualizar-ano" name="ano" class="form-control" type="number" step="1" min="0" max="2023" value="<?php echo $ano; ?>">
+                <input id="input-atualizar-ano" name="ano" class="form-control" type="number" step="1" min="0" max="2023" value="<?php echo $ano; ?>" required>
             </div>
             <button class="btn btn-primary fs-5" type="submit">Atualizar</button>
         </form>

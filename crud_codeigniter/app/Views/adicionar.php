@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Usuários - Biblioteca Virtual</title>
+    <title>Adicionar - Biblioteca Virtual</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&family=Noto+Sans+Osmanya&display=swap">
@@ -28,7 +28,7 @@
                 <section id="header-right-content" class="collapse navbar-collapse">
                     <ul id="header-right-content-list" class="navbar-nav">
                         <li class="nav-item">
-                            <a href="<?php echo base_url(); ?>adicionar" class="d-flex align-items-center">
+                            <a href="<?php echo base_url(); ?>adicionar" class="link-active d-flex align-items-center">
                                 <span class="material-symbols-outlined header-icon">add</span>
                                 <p class="m-0">Adicionar livro</p>
                             </a>
@@ -40,7 +40,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?php echo base_url(); ?>usuarios" class="link-active d-flex align-items-center">
+                            <a href="<?php echo base_url(); ?>usuarios" class="d-flex align-items-center">
                                 <span class="material-symbols-outlined header-icon">person</span>
                                 <p class="m-0">Lista de usuários</p>
                             </a>
@@ -54,57 +54,33 @@
         </nav>
     </header>
     <main class="container py-3">
-        <h1 class="text-center my-3">Livros disponíveis</h1>
-        <?php if (isset($MENSAGEM)) { ?>
-            <p class="text-center text-success mb-4 fs-4"><?php echo 'Usuário removido com sucesso!'; ?></p>
-        <?php } ?>
-        <form method="GET" action="<?php echo base_url(); ?>usuarios" id="form-ordem" class="mb-4">
-            <div class="input-group">
-                <select class="form-control" name="ordem">
-                    <option value="a_z_users" <?php if (isset($a_z_users)) echo 'selected'; ?>>A-Z (crescente)</option>
-                    <option value="z_a_users" <?php if (isset($z_a_users)) echo 'selected'; ?>>Z-A (decrescente)</option>
-                    <option value="id_c" <?php if (isset($id_c) || !$ORDENADO) echo 'selected'; ?>>ID (crescente)</option>
-                    <option value="id_d" <?php if (isset($id_d)) echo 'selected'; ?>>ID (decrescente)</option>
-                </select>
-                <button class="btn btn-primary" type="submit">Aplicar</button>
+        <h1 class="text-center my-3">Adicionar livro</h1>
+        <form method="POST" action="<?php echo base_url(); ?>adicionar_livro" id="form-atualizar" class="d-flex flex-column w-100 p-4 mx-auto border border-2 rounded">
+            <div class="mb-3">
+                <label for="input-atualizar-titulo" class="form-label">Título do livro</label>
+                <input id="input-atualizar-titulo" name="titulo" class="form-control<?php if (isset($TITULO_ERROR)) echo ' is-invalid'; ?>" type="text" pattern="^(?=.*[a-zA-Z]).{1,128}$" maxlength="128" value="<?php if (isset($titulo)) echo $titulo; ?>" required autofocus>
             </div>
-        </form>
-        <form method="GET" action="<?php echo base_url(); ?>usuarios" class="mb-4 d-flex align-items-end">
-            <div class="w-25">
-                <label for="input-titulo" class="form-label">Pesquisa por nome</label>
-                <input id="input-titulo" name="pesquisa" class="form-control" type="text" maxlength="128" value="<?php if (isset($PESQUISA)) echo $PESQUISA; ?>" placeholder="Digite o nome do usuário">
+            <?php if (isset($TITULO_ERROR)) { ?>
+                <p class="text-danger mb-4">Livro "<?php echo $TITULO_ERROR_DESC; ?>" já cadastrado.</p>
+            <?php } ?>
+            <div class="mb-4">
+                <label for="input-atualizar-quantidade" class="form-label">Quantidade em estoque</label>
+                <input id="input-atualizar-quantidade" name="quantidade" class="form-control" type="number" step="1" min="0" max="4294967294" value="<?php if (isset($quantidade)) echo $quantidade; ?>" required>
             </div>
-            <button class="btn btn-primary" type="submit">
-                <span class="material-symbols-outlined header-icon fs-5">search</span>
-            </button>
+            <div class="mb-3">
+                <label for="input-atualizar-autor" class="form-label">Nome do(a) autor(a)</label>
+                <input id="input-atualizar-autor" name="autor" class="form-control" type="text" pattern="^(?=.*[a-zA-Z]).{1,128}$" maxlength="128" value="<?php if (isset($autor)) echo $autor; ?>" required>
+            </div>
+            <div class="mb-3">
+                <label for="input-atualizar-editora" class="form-label">Nome da editora</label>
+                <input id="input-atualizar-editora" name="editora" class="form-control" type="text" pattern="^(?=.*[a-zA-Z]).{1,128}$" maxlength="128" value="<?php if (isset($editora)) echo $editora; ?>" required>
+            </div>
+            <div class="mb-4">
+                <label for="input-atualizar-ano" class="form-label">Ano de publicação</label>
+                <input id="input-atualizar-ano" name="ano" class="form-control" type="number" step="1" min="0" max="2023" value="<?php if (isset($ano)) echo $ano; ?>" required>
+            </div>
+            <button class="btn btn-success fs-5" type="submit">Adicionar</button>
         </form>
-        <div class="table-responsive">
-            <table id="tabela-livros" class="table table-striped border border-2">
-                <thead>
-                    <th scope="col">#</th>
-                    <th scope="col">Nome</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">REMOVER</th>
-                </thead>
-                <tbody>
-                <?php foreach ($USUARIOS as $usuario) { ?>
-                    <tr valign="middle">
-                        <th scope="row"><?php echo $usuario['id']; ?></th>
-                        <td><?php echo $usuario['nome']; ?></td>
-                        <td><?php echo $usuario['email']; ?></td>
-                        <td>
-                            <form method="POST" action="<?php echo base_url(); ?>remover_usuario">
-                                <input name="id" value="<?php echo $usuario['id']; ?>" type="hidden">  
-                                <button class="btn btn-danger d-flex align-items-center" type="submit">
-                                    <span class="material-symbols-outlined">close</span>
-                                </button> 
-                            </form>
-                        </td>
-                    </tr>
-                <?php } ?>
-                </tbody>
-            </table>
-        </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </body>

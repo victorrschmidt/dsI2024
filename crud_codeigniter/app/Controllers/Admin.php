@@ -113,8 +113,59 @@ class Admin extends BaseController
         if (!$session->ID || $session->TIPO !== 'A') {
             return redirect()->to(base_url().'login');
         }
+
+        $data = [
+            'EMAIL'    => $session->EMAIL,
+            'NOME'     => $session->NOME,
+        ];
+
+        if ($session->TITULO_ERROR) {
+            $data['TITULO_ERROR'] = true;
+            $data['TITULO_ERROR_DESC'] = $session->TITULO_ERROR_DESC;
+
+            foreach ($session->last_request as $key => $value) {
+                $data[$key] = $value;
+            }
+
+            $session->remove('TITULO_ERROR');
+            $session->remove('TITULO_ERROR_DESC');
+            $session->remove('last_request');
+        }
     
         return view('adicionar', $data);
+    }
+
+    public function adicionarLivro()
+    {   
+        // Iniciar sessão
+        $session = session();
+
+        // Retornar ao login se não existe um usuário admin logado
+        if (!$session->ID || $session->TIPO !== 'A') {
+            return redirect()->to(base_url().'login');
+        }
+
+        $db = new LivrosModel();
+
+        $request = $this->request->getPost();
+
+        // Verificar se existe um livro com o título informado
+        $result = $db->where('titulo', $request['titulo'])->first();
+
+        // Se existe outro livro com o mesmo título
+        if (!empty($result) && $result['titulo'] === $request['titulo']) {
+            $session->set('TITULO_ERROR', true);
+            $session->set('TITULO_ERROR_DESC', $request['titulo']);
+            $session->set('last_request', $request);
+
+            return redirect()->to(base_url().'adicionar');
+        }
+
+        $db->insert($request);
+
+        $session->set('MENSAGEM', 'Livro adicionado com sucesso!');
+
+        return redirect()->to(base_url().'menu_admin');
     }
 
     public function editar()
@@ -158,15 +209,8 @@ class Admin extends BaseController
             $session->remove('EDIT_ERROR');
             $session->remove('TITULO_ERROR_DESC');
         }
-        
-        $session->set('MENSAGEM', 'Livro editado com sucesso!');
 
         return view('editar', $data);
-    }
-
-    public function adicionarLivro()
-    {
-
     }
 
     public function editarLivro()
@@ -208,6 +252,8 @@ class Admin extends BaseController
         foreach ($livro_editado as $key => $value) {
             $session->remove($key);
         }
+
+        $session->set('MENSAGEM', 'Livro editado com sucesso!');
 
         return redirect()->to(base_url().'menu_admin');
     }
