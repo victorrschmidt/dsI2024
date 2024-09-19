@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empregados</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <header class="container d-flex justify-content-center gap-5 mt-2">
+        <a href="/" class="btn btn-warning btn-lg active fs-5" role="button" aria-pressed="true">Gerenciar</a>
+        <a href="/cadastrar" class="btn btn-success btn-lg fs-5">Cadastrar empregado</a>
+    </header>
+    <main class="container mt-5">
+        <h1 class="mb-4">Tabela de empregados</h1>
+        <div class="container d-flex flex-row align-items-center gap-5 mb-2">
+            <div class="font-weight-bold fs-5">Ordenar por:</div>
+            <div id="sorters">
+                <button id="id-asc" class="btn btn-primary" disabled>ID ∧</button>
+                <button id="id-desc" class="btn btn-primary">ID V</button>
+                <button id="sal-asc" class="btn btn-primary">Salário líq. ∧</button>
+                <button id="sal-desc" class="btn btn-primary">Salário líq. V</button>
+                <button id="dep-asc" class="btn btn-primary">Departamento ∧</button>
+                <button id="dep-desc" class="btn btn-primary">Departamento V</button>
+            </div>
+        </div>
+        <div class="container d-flex flex-row align-items-center gap-2 mb-2">
+            <div class="font-weight-bold fs-5">Pesquisar por nome:</div>
+            <input id="name-search" class="w-25" type="text" placeholder="Digite o nome do empregado">
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Departamento</th>
+                    <th scope="col">Salário bruto (R$)</th>
+                    <th scope="col">Salário líquido (R$)</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+                {{#each employees }}
+                <tr class="employee">
+                    <th scope="row">{{ id }}</th>
+                    <td>{{ name }}</td>
+                    <td>{{ department }}</td>
+                    <td>{{ brute_salary }}</td>
+                    <td>{{ liquid_salary }}</td>
+                    <td><a href="/editar/{{ id }}" class="btn btn-primary">Editar</a></td>
+                    <td><a href="/deletar/{{ id }}" class="btn btn-danger">Deletar</a></td>
+                </tr>
+                {{/each }}
+            </tbody>
+        </table>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        class EmployeeTable {
+            constructor() {
+                this.properties = ['id', 'name', 'department', 'brute_salary', 'liquid_salary', 'editar', 'deletar'];
+                this.employee_list = [];
+
+                const tr_list = document.getElementsByClassName('employee');
+
+                for (const tr of tr_list) {
+                    const employee = {};
+
+                    for (const [i, property] of this.properties.entries()) {
+                        employee[property] = tr.children[i].innerHTML;
+                    }
+
+                    this.employee_list.push(employee);
+                }
+
+                this.current_employee_list = [...this.employee_list];
+            }
+
+            orderBy(param, order) {
+                switch (param) {
+                    case 'department':
+                        this.current_employee_list.sort((a, b) => (order * Number(a[param][0])) - (order * Number(b[param][0])));
+                        break;
+                    case 'liquid_salary':
+                        this.current_employee_list.sort((a, b) => (order * this.getNumbers(a[param])) - (order * this.getNumbers(b[param])));
+                        break;
+                    default:
+                        this.current_employee_list.sort((a, b) => (order * Number(a[param])) - (order * Number(b[param])));
+                }
+
+                this.buildTable();
+            }
+
+            searchMatch(search) {
+                this.current_employee_list = this.employee_list.filter((employee) => employee.name.toLowerCase().includes(search));
+                this.buildTable();
+            }
+
+            buildTable() {
+                const tbody = document.getElementById('tbody');
+
+                while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+                }
+
+                for (const employee of this.current_employee_list) {
+                    const tr = document.createElement('tr');
+                    tr.classList.add('employee');
+                    
+                    const th = document.createElement('th');
+                    th.scope = 'row';
+                    th.innerHTML = employee['id'];
+
+                    tr.appendChild(th);
+
+                    for (let i = 1; i < this.properties.length; i++) {
+                        const td = document.createElement('td');
+                        
+                        if (i < 5) {
+                            td.innerHTML = employee[this.properties[i]];
+                            tr.appendChild(td);
+                            continue;
+                        }
+
+                        const a = document.createElement('a');
+                        a.href = `${this.properties[i]}/${employee['id']}`;
+                        a.classList.add('btn');
+
+                        if (i == 5) {
+                            a.classList.add('btn-primary');
+                            a.innerHTML = 'Editar';
+                        }
+                        else {
+                            a.classList.add('btn-danger');
+                            a.innerHTML = 'Deletar';
+                        }
+
+                        td.appendChild(a);
+                        tr.appendChild(td);
+                        tbody.appendChild(tr);
+                    }
+                }
+            }
+
+            getNumbers(salary) {
+                let numbers = '';
+
+                for (const char of salary) {
+                    if (char >= '0' && char <= '9') {
+                        numbers += char;
+                    }
+                }
+
+                return Number(numbers / 100);
+            }
+        }
+
+        const employeeTable = new EmployeeTable();
+
+        const sorters = document.getElementById('sorters');
+        const id_asc = document.getElementById('id-asc');
+        const id_desc = document.getElementById('id-desc');
+        const sal_asc = document.getElementById('sal-asc');
+        const sal_desc = document.getElementById('sal-desc');
+        const dep_asc = document.getElementById('dep-asc');
+        const dep_desc = document.getElementById('dep-desc');
+
+        function enableSorters() {
+            for (const button of sorters.children) {
+                button.disabled = false;
+            }
+        }
+
+        id_asc.addEventListener('click', () => {
+            employeeTable.orderBy('id', 1);
+            enableSorters();
+            id_asc.disabled = true;
+        });
+        id_desc.addEventListener('click', () => {
+            employeeTable.orderBy('id', -1);
+            enableSorters();
+            id_desc.disabled = true;
+        });
+
+        sal_asc.addEventListener('click', () => {
+            employeeTable.orderBy('liquid_salary', 1);
+            enableSorters();
+            sal_asc.disabled = true;
+        });
+        sal_desc.addEventListener('click', () => {
+            employeeTable.orderBy('liquid_salary', -1);
+            enableSorters();
+            sal_desc.disabled = true;
+        });
+
+        dep_asc.addEventListener('click', () => {
+            employeeTable.orderBy('department', 1);
+            enableSorters();
+            dep_asc.disabled = true;
+        });
+        dep_desc.addEventListener('click', () => {
+            employeeTable.orderBy('department', -1);
+            enableSorters();
+            dep_desc.disabled = true;
+        });
+
+        const search = document.getElementById('name-search');
+
+        search.onkeyup = () => {
+            const name = search.value.trim().toLowerCase();
+            employeeTable.searchMatch(name);
+        }
+    </script>
+</body>
+</html>
